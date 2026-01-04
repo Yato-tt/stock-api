@@ -23,7 +23,8 @@ if (usePostgres) {
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
+      },
+      family: 4,
     },
     logging: false,
     define: {
