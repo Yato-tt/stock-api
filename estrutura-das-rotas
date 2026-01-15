@@ -1,0 +1,11 @@
+Stock-It Rotas
+
+Públicas
+/login		= POST
+/register	= POST
+
+Fechadas
+/produtos	= GET
+/produtos/cadastro	= POST
+/produtos/edit/:id	= PUT
+/produtos/delete	= DELETE
