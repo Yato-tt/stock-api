@@ -6,6 +6,7 @@ const sequelize = require('./config/database');
 require('./models');
 const userRoute = require('./routes/userRoutes');
 const produtoRoute = require('./routes/produtoRoutes');
+const movimentacaoRoute = require('./routes/movimentacaoRoutes');
 const port = 3000;
 const localIP = '192.168.3.203';
 
@@ -42,6 +43,7 @@ app.use(helmet({
 app.use(express.json());
 app.use('/', userRoute);
 app.use('/produtos', produtoRoute);
+app.use('/movimentacoes', movimentacaoRoute);
 app.use('/uploads', express.static('uploads'));
 
 app.get('/health', (req, res) => {
