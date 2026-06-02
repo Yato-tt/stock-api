@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
   async create(req, res) {
     try {
-      const { nome, descricao, preco, quantidade, empresa_id, fornecedor_id } = req.body;
+      const { nome, descricao, preco, quantidade, fornecedor_id } = req.body;
 
       const erros = [];
 
@@ -17,12 +17,12 @@ module.exports = {
       if (!nomeCheck) {
         erros.push('O campo nome é obrigatório');
       } else if (nomeCheck.length < 3 || nomeCheck.length > 100) {
-        erros.push('O campo nome deve conter entre 6 e 100 caracteres');
+        erros.push('O campo nome deve conter entre 3 e 100 caracteres');
       }
 
       if (descCheck) {
         if (descCheck.length < 3 || descCheck.length > 255) {
-          erros.push('O campo deve conter entre 6 e 255 caracteres');
+          erros.push('O campo descrição deve conter entre 3 e 255 caracteres');
         }
       }
 
@@ -42,13 +42,26 @@ module.exports = {
         return res.status(400).json({ erros });
       }
 
-      const produtoExist = await Produtos.findOne({ where: {nome: nome } });
+      const produtoExist = await Produtos.findOne({
+        where: {
+          nome: nomeCheck,
+          empresa_id: req.user.empresa_id
+        }
+      });
       if (produtoExist) {
         return res.status(400).json({ message: 'Produto já cadastrado!' });
       }
 
-      const produtos = await Produtos.create({ nome: nomeCheck, descricao: descCheck, preco: precoCheck, quantidade: qtdCheck, empresa_id, fornecedor_id });
-      res.status(201).json(produtos);
+      const produto = await Produtos.create({
+        nome: nomeCheck,
+        descricao: descCheck || null,
+        preco: precoCheck,
+        quantidade: qtdCheck,
+        empresa_id: req.user.empresa_id,
+        fornecedor_id: fornecedor_id || null,
+      });
+
+      res.status(201).json(produto);
     } catch (e) {
       res.status(500).json({ message: 'Erro ao cadastrar produto: ', error: e.message });
     }
@@ -56,16 +69,14 @@ module.exports = {
 
   async lista(req, res) {
     try {
-      // const produtos = await Produtos.findAll({ attributes: ['id', 'nome', 'descricao', 'preco', 'quantidade']});
-
       const produtos = await Produtos.findAll({
         where: { empresa_id: req.user.empresa_id },
-        attributes: ['id', 'nome', 'descricao', 'preco', 'quantidade', 'foto']
+        attributes: ['id', 'nome', 'descricao', 'preco', 'quantidade', 'foto'],
       });
 
       res.json(produtos);
     } catch (e) {
-      res.status(500).json({ message: 'Erro ao carregar produtos: ', e });
+      res.status(500).json({ message: 'Erro ao carregar produtos: ', error: e.message });
     }
   },
 
@@ -78,7 +89,7 @@ module.exports = {
           id,
           empresa_id: req.user.empresa_id
         },
-        attributes: ['id', 'nome', 'descricao', 'preco', 'quantidade', 'foto', 'empresa_id', 'fornecedor_id']
+        attributes: ['id', 'nome', 'descricao', 'preco', 'quantidade', 'foto', 'empresa_id', 'fornecedor_id'],
       });
 
       if (!produto) {
@@ -87,7 +98,7 @@ module.exports = {
 
       res.json(produto);
     } catch (e) {
-      res.status(500).json({ message: 'Erro ao buscar produto: ', e });
+      res.status(500).json({ message: 'Erro ao buscar produto: ', error: e.message });
     }
   },
 
@@ -107,16 +118,15 @@ module.exports = {
       }
 
       if (nome) produto.nome = String(nome).trim().toLowerCase();
-      if (descricao) produto.descricao = String(descricao).trim().toLowerCase();
+      if (descricao !== undefined) produto.descricao = descricao ? String(descricao).trim().toLowerCase() : null;
       if (preco !== undefined) produto.preco = parseFloat(preco);
       if (quantidade !== undefined) produto.quantidade = parseInt(quantidade);
 
       await produto.save();
 
       res.status(200).json({ message: 'Dados atualizados com sucesso' });
-
     } catch (e) {
-      res.status(500).json({ message: 'Erro ao atualizar item: ', e });
+      res.status(500).json({ message: 'Erro ao atualizar item: ', error: e.message });
     }
   },
 
@@ -137,9 +147,8 @@ module.exports = {
       await produto.destroy();
 
       res.status(200).json({ message: 'Produto excluído!' });
-
     } catch (e) {
-      res.status(500).json({ message: 'Erro ao deletar produto: ', e });
+      res.status(500).json({ message: 'Erro ao deletar produto: ', error: e.message });
     }
   },
 
@@ -174,16 +183,10 @@ module.exports = {
 
       res.status(200).json({
         message: 'Foto do produto atualizada com sucesso!',
-        foto: produto.foto
+        foto: produto.foto,
       });
-
     } catch (error) {
-      console.error('Erro no uploadFoto:', error);
-      res.status(500).json({
-        message: 'Erro ao fazer upload da foto',
-        error: error.message
-      });
+      res.status(500).json({ message: 'Erro ao fazer upload da foto', error: error.message });
     }
   }
-
 };

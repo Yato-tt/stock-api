@@ -16,13 +16,13 @@ Fornecedor.belongsTo(Empresa, { foreignKey: 'empresa_id' });
 Fornecedor.hasMany(Produtos, { foreignKey: 'fornecedor_id' });
 
 Produtos.belongsTo(Empresa, { foreignKey: 'empresa_id' });
-Produtos.belongsTo(Fornecedor, { foreignKey: 'fornecedor_id' });
+// Fornecedor é opcional — não forçar FK constraint nem join automático
+Produtos.belongsTo(Fornecedor, { foreignKey: 'fornecedor_id', constraints: false });
 Produtos.hasMany(Movimentacao, { foreignKey: 'produto_id' });
 
 Movimentacao.belongsTo(Empresa, { foreignKey: 'empresa_id' });
 Movimentacao.belongsTo(User, { foreignKey: 'user_id' });
 Movimentacao.belongsTo(Produtos, { foreignKey: 'produto_id' });
-
 
 module.exports = {
   Empresa,
@@ -30,4 +30,4 @@ module.exports = {
   User,
   Produtos,
   Movimentacao,
-}
+};

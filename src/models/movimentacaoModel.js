@@ -10,17 +10,20 @@ const Movimentacao = sequelize.define('Movimentacao', {
   produto_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'produto_id',
   },
   empresa_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'empresa_id',
   },
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'user_id',
   },
   tipo: {
-    type: DataTypes.ENUM('entrada', 'saida'),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   quantidade: {
@@ -34,10 +37,12 @@ const Movimentacao = sequelize.define('Movimentacao', {
   quantidade_anterior: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'quantidade_anterior',
   },
   quantidade_posterior: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    field: 'quantidade_posterior',
   },
 }, {
   tableName: 'movimentacoes',

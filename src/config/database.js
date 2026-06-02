@@ -7,6 +7,11 @@ const { Sequelize } = require('sequelize');
 const isProduction = process.env.NODE_ENV === 'production';
 const usePostgres = process.env.DB_DIALECT === 'postgres';
 
+const sharedDefine = {
+  timestamps: true,
+  underscored: true,
+};
+
 let sequelize;
 
 if (usePostgres) {
@@ -28,10 +33,7 @@ if (usePostgres) {
       connectTimeout: 60000
     },
     logging: false,
-    define: {
-      timestamps: true,
-      underscored: true,
-    },
+    define: sharedDefine,
     pool: {
       max: 5,
       min: 0,
@@ -47,11 +49,15 @@ if (usePostgres) {
     process.env.DB_PASS,
     {
       host: process.env.DB_HOST,
-      dialect: process.env.DB_DIALECT,
-      define: {
-        timestamps: true,
-        underscored: true,
-      },
+      dialect: process.env.DB_DIALECT || 'mysql',
+      logging: false,
+      define: sharedDefine,
+      pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      }
     }
   );
 }

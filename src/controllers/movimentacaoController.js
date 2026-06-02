@@ -2,6 +2,9 @@ const Movimentacao = require('../models/movimentacaoModel.js');
 const Produtos = require('../models/produtoModel.js');
 const User = require('../models/userModel.js');
 
+const TIPOS_VALIDOS = ['entrada', 'saida', 'ajuste'];
+const MOTIVOS_VALIDOS = ['compra', 'reabastecimento', 'ajuste', 'venda', 'avaria'];
+
 module.exports = {
   async registrar(req, res) {
     try {
@@ -9,22 +12,26 @@ module.exports = {
 
       const erros = [];
 
-      const tiposValidos = ['entrada', 'saida'];
       const tipoCheck = tipo ? String(tipo).trim().toLowerCase() : '';
       const qtdCheck = quantidade !== undefined ? parseInt(quantidade) : NaN;
+      const motivoCheck = motivo ? String(motivo).trim().toLowerCase() : null;
 
       if (!produto_id) {
         erros.push('O campo produto é obrigatório');
       }
 
-      if (!tipoCheck || !tiposValidos.includes(tipoCheck)) {
-        erros.push('O tipo deve ser "entrada" ou "saida"');
+      if (!tipoCheck || !TIPOS_VALIDOS.includes(tipoCheck)) {
+        erros.push('O tipo deve ser "entrada", "saida" ou "ajuste"');
       }
 
       if (quantidade === undefined || quantidade === null || String(quantidade).trim() === '') {
         erros.push('O campo quantidade é obrigatório');
-      } else if (!Number.isInteger(qtdCheck) || qtdCheck <= 0) {
-        erros.push('A quantidade deve ser um número inteiro maior que zero');
+      } else if (!Number.isInteger(qtdCheck) || qtdCheck < 0) {
+        erros.push('A quantidade deve ser um número inteiro não negativo');
+      }
+
+      if (motivoCheck && !MOTIVOS_VALIDOS.includes(motivoCheck)) {
+        erros.push('Motivo inválido');
       }
 
       if (erros.length > 0) {
@@ -50,8 +57,11 @@ module.exports = {
 
       if (tipoCheck === 'entrada') {
         produto.quantidade += qtdCheck;
-      } else {
+      } else if (tipoCheck === 'saida') {
         produto.quantidade -= qtdCheck;
+      } else {
+        // ajuste — sobrescreve diretamente, sem somar nem subtrair
+        produto.quantidade = qtdCheck;
       }
 
       const quantidade_posterior = produto.quantidade;
@@ -64,7 +74,7 @@ module.exports = {
         user_id: req.user.id,
         tipo: tipoCheck,
         quantidade: qtdCheck,
-        motivo: motivo ? String(motivo).trim() : null,
+        motivo: motivoCheck,
         quantidade_anterior,
         quantidade_posterior,
       });

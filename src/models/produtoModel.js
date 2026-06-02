@@ -29,12 +29,16 @@ const Produtos = sequelize.define('Produtos', {
   },
   empresa_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    field: 'empresa_id',
   },
   fornecedor_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
+    field: 'fornecedor_id',
   }
+}, {
+  tableName: 'produtos',
 });
 
 module.exports = Produtos;

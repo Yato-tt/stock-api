@@ -8,9 +8,10 @@ const userRoute = require('./routes/userRoutes');
 const produtoRoute = require('./routes/produtoRoutes');
 const movimentacaoRoute = require('./routes/movimentacaoRoutes');
 const port = 3000;
-const localIP = '192.168.3.203';
+const localIP = process.env.LOCAL_IP || '192.168.3.203';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const isPostgres = process.env.DB_DIALECT === 'postgres';
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -28,11 +29,11 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1 || !isProduction) {
       callback(null, true);
     } else {
-      callback(null, true);
+      callback(new Error('Origem não permitida pelo CORS'), false);
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
   credentials: true
 }));
 
@@ -50,13 +51,24 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    dialect: isPostgres ? 'postgres' : 'mariadb/mysql'
   });
 });
 
-sequelize.sync().then(() => {
-  const host = isProduction ? '0.0.0.0' : localIP;
-  app.listen(port, host, () => {
-    console.log(`App: http://${host}:${port}`);
+// Postgres em produção: sem alter (schema gerenciado pelo Railway)
+// MariaDB local: alter:true para aplicar mudanças sem recriar tabelas
+const syncOptions = isPostgres ? {} : { alter: true };
+
+sequelize.sync(syncOptions)
+  .then(() => {
+    const host = isProduction ? '0.0.0.0' : localIP;
+    app.listen(port, host, () => {
+      console.log(`App rodando: http://${host}:${port}`);
+      console.log(`Banco: ${isPostgres ? 'PostgreSQL' : 'MariaDB/MySQL'}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao sincronizar banco:', err.message);
+    process.exit(1);
   });
-});
