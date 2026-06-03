@@ -7,6 +7,7 @@ require('./models');
 const userRoute = require('./routes/userRoutes');
 const produtoRoute = require('./routes/produtoRoutes');
 const movimentacaoRoute = require('./routes/movimentacaoRoutes');
+const sseRoute = require('./routes/sseRoutes');
 const port = 3000;
 const localIP = process.env.LOCAL_IP || '192.168.3.203';
 
@@ -33,7 +34,7 @@ app.use(cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'cache-control' , 'Pragma'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
   credentials: true
 }));
 
@@ -45,6 +46,7 @@ app.use(express.json());
 app.use('/', userRoute);
 app.use('/produtos', produtoRoute);
 app.use('/movimentacoes', movimentacaoRoute);
+app.use('/eventos', sseRoute);
 app.use('/uploads', express.static('uploads'));
 
 app.get('/health', (req, res) => {
@@ -56,8 +58,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Postgres em produção: sem alter (schema gerenciado pelo Railway)
-// MariaDB local: alter:true para aplicar mudanças sem recriar tabelas
 const syncOptions = isPostgres ? {} : { alter: true };
 
 sequelize.sync(syncOptions)
