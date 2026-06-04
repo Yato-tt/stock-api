@@ -45,7 +45,7 @@ module.exports = {
         preco:         precoCheck,
         quantidade:    qtdCheck,
         empresa_id:    req.user.empresa_id,
-        fornecedor_id: fornecedor_id || null,
+        fornecedor_id: fornecedor_id || 1,
       });
 
       sse.emitir(req.user.empresa_id, 'catalogo', { acao: 'criado', produto_id: produto.id });
