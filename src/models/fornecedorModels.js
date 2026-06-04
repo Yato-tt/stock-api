@@ -1,27 +1,25 @@
-const { DataTypes, Model }= require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Fornecedor = sequelize.define("Fornecedor", {
   id: {
-    type:DataTypes.INTEGER,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
-    allowNull: false,
-    primaryKey: true
+    primaryKey: true,
   },
   nome: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  cnpj: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   empresa_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-  }
-},{
-  tableName: "fornecedores"
+  },
+}, {
+  tableName:  'fornecedores',
+  timestamps: true,
+  createdAt:  'created_at',
+  updatedAt:  'updated_at',
 });
 
 module.exports = Fornecedor;

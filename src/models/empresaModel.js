@@ -5,7 +5,7 @@ const Empresa = sequelize.define("Empresa", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   nome: {
     type: DataTypes.STRING,
@@ -14,10 +14,13 @@ const Empresa = sequelize.define("Empresa", {
   cnpj: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
+    unique: true,
   },
 }, {
-  tableName: "empresas"
+  tableName:  'empresas',
+  timestamps: true,
+  createdAt:  'created_at',
+  updatedAt:  'updated_at',
 });
 
 module.exports = Empresa;

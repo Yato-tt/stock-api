@@ -37,7 +37,9 @@ const Produtos = sequelize.define('Produtos', {
   },
 }, {
   tableName:  'produtos',
-  timestamps: false,   // tabela não tem created_at/updated_at
+  timestamps: true,
+  createdAt:  'created_at',
+  updatedAt:  'updated_at',
 });
 
 module.exports = Produtos;
