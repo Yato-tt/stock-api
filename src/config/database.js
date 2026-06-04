@@ -5,18 +5,19 @@ require('dotenv').config({
 const { Sequelize } = require('sequelize');
 
 const isProduction = process.env.NODE_ENV === 'production';
-const usePostgres = process.env.DB_DIALECT === 'postgres';
+const usePostgres  = process.env.DB_DIALECT === 'postgres';
 
+// underscored: false — cada model declara seus próprios field/timestamps
+// evita conflito entre o mapeamento automático e o que já existe no banco
 const sharedDefine = {
-  timestamps: true,
-  underscored: true,
+  timestamps:  true,
+  underscored: false,
 };
 
 let sequelize;
 
 if (usePostgres) {
   const DATABASE_URL = process.env.DATABASE_URL;
-
   if (!DATABASE_URL) {
     console.error('DATABASE_URL não configurada');
     process.exit(1);
@@ -26,20 +27,12 @@ if (usePostgres) {
     dialect: 'postgres',
     protocol: 'postgres',
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      },
-      connectTimeout: 60000
+      ssl: { require: true, rejectUnauthorized: false },
+      connectTimeout: 60000,
     },
     logging: false,
-    define: sharedDefine,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 60000,
-      idle: 10000
-    }
+    define:  sharedDefine,
+    pool: { max: 5, min: 0, acquire: 60000, idle: 10000 },
   });
 
 } else {
@@ -48,16 +41,11 @@ if (usePostgres) {
     process.env.DB_USER,
     process.env.DB_PASS,
     {
-      host: process.env.DB_HOST,
+      host:    process.env.DB_HOST,
       dialect: process.env.DB_DIALECT || 'mysql',
       logging: false,
-      define: sharedDefine,
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-      }
+      define:  sharedDefine,
+      pool: { max: 5, min: 0, acquire: 30000, idle: 10000 },
     }
   );
 }

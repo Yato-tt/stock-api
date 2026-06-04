@@ -30,15 +30,14 @@ const Produtos = sequelize.define('Produtos', {
   empresa_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'empresa_id',
   },
   fornecedor_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'fornecedor_id',
-  }
+  },
 }, {
-  tableName: 'produtos',
+  tableName:  'produtos',
+  timestamps: false,   // tabela não tem created_at/updated_at
 });
 
 module.exports = Produtos;
